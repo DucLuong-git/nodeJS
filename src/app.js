@@ -1,56 +1,25 @@
-const express=require("express")
-import cors from "cors"
-const app=express()
-app.use(cors()) //cấp quyền truy cập api 
-app.get("/", ()=>{
-    console.log("home page")
-})
+import express from "express";
+import cors from "cors";
+import router from "./routers";
+import mongoose from "mongoose";
+const app = express();
 
-const products =[
-    {id:1, name: "product 1", price: 100},
-    {id:2, name: "product 2", price: 100},
-    {id:3, name: "product 3", price: 100}
-]
+app.use(cors());
+app.use(express.json());
 
-app.get("/products",(req, res)=>{
-    return res.json(products)
-})
+// khai báo router
+app.use("/api", router);
 
-app.get("/products/:id",(req, res)=>{
-    const productId=parseInt(req.params.id)
-    const product=products.find(p=>p.id===productId)
-    if(product){
-        return res.json(product)
-    }else{
-        return res.status(404).json({message: "không có sản phẩm"})
-    }
-})
-
-app.delete("/products/:id",(req, res)=>{
-    const productId =parseInt(req.params.id)
-    const productIndex = products.findIndex(p=> p.id === productId)
-    if(productIndex===-1){
-         return res.status(404).json({message: "không có sản phẩm để xoá"})
-    }
-    const deleteProduct = products.splice(productIndex, 1)[0]
-    return res.json({
-        message:"xoá sp thành công",
-        deleteProduct: deleteProduct,
-        ResProduct: products
+// kết nối database
+mongoose
+    .connect("mongodb://localhost:27017/WD20306")
+    .then(() => {
+        console.log("Kết nối database thành công");
     })
-})
-
-app.get("/greet",(req, res)=>{
-    const name=req.query.name || "Luong"
-    res.json({message: `xin chào ${name}`})
-})
-
-app.get("/sum",(req, res)=>{
-    const a =parseInt(req.query.a) || 0 // Lấy giá trị 'a' từ query string
-    const b =parseInt(req.query.b) || 0 // Lấy giá trị 'b' từ query string
-    res.json({sum: a + b})
-})
-
+    .catch((error) => {
+        console.log("Kết nối database thất bại", error);
+    });
+// khởi tạo server cổng 3000
 app.listen(3000, () => {
     console.log("Server đang chạy cổng 3000");
 });
